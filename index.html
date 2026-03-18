@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>VIZHU — Presale Configurator v3</title>
+  <style>
+    :root {
+      --bg: #0b0e0c;
+      --bg-2: #111612;
+      --panel: rgba(18, 22, 20, 0.96);
+      --panel-2: rgba(24, 30, 26, 0.98);
+      --line: rgba(188, 214, 124, 0.12);
+      --line-strong: rgba(188, 214, 124, 0.26);
+      --brand: #b9dc77;
+      --brand-2: #c9ee86;
+      --brand-soft: rgba(188, 214, 124, 0.12);
+      --text: #edf3ea;
+      --muted: rgba(237, 243, 234, 0.68);
+      --muted-2: rgba(237, 243, 234, 0.42);
+      --ok: #a6d18f;
+      --warn: #e2c57d;
+      --err: #e2a39b;
+      --blue: #a7c8ff;
+      --radius: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 18px 38px rgba(0,0,0,.26), 0 0 0 1px rgba(188,214,124,.03);
+      --shadow-soft: 0 12px 24px rgba(0,0,0,.22);
+      --max: 1640px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(188,214,124,.07), transparent 22%),
+        radial-gradient(circle at left 18%, rgba(188,214,124,.03), transparent 18%),
+        linear-gradient(180deg, #090b09 0%, #0f1311 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.016) 1px, transparent 1px);
+      background-size: 42px 42px;
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.22), transparent 78%);
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.22), transparent 78%);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    .app {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 284px minmax(0, 1fr) 380px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(20,24,22,.96), rgba(12,15,13,.98));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .sidebar, .summary {
+      position: sticky;
+      top: 24px;
+    }
+
+    .brand {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand h1 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .menu {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .menu button {
+      width: 100%;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: .16s ease;
+    }
+
+    .menu button:hover,
+    .menu button.active {
+      border-color: var(--line-strong);
+      background: linear-gradient(180deg, rgba(188,214,124,.10), rgba(188,214,124,.04));
+    }
+
+    .menu .title { display: block; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .menu .sub { display: block; font-size: 12px; color: var(--muted); }
+
+    .center { display: grid; gap: 18px; }
+
+    .hero {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 290px;
+      gap: 18px;
+    }
+
+    .hero h2 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.02;
+      letter-spacing: -.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 880px;
+      font-size: 14px;
+      line-height: 1.62;
+      color: var(--muted);
+    }
+
+    .hero-tags, .badge-row, .inline-actions, .switch-row, .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .hero-tags { margin-top: 16px; }
+
+    .chip, .hero-tag, .chip-tier, .chip-soft {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.024);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .chip-tier.budget { color: var(--ok); background: rgba(166,209,143,.08); }
+    .chip-tier.standard { color: var(--blue); background: rgba(167,200,255,.08); border-color: rgba(167,200,255,.18); }
+    .chip-tier.premium { color: #ebddb6; background: rgba(226,197,125,.09); border-color: rgba(226,197,125,.18); }
+
+    .hero-aside { display: grid; gap: 12px; }
+    .hero-stat {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.02);
+      padding: 16px;
+    }
+    .hero-stat strong { display: block; font-size: 26px; letter-spacing: -.04em; margin-bottom: 4px; }
+    .hero-stat span { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      grid-column: span 12;
+      padding: 20px;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.02em; }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .tiny { color: var(--muted-2); font-size: 12px; line-height: 1.5; }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .field-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .field-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .field { display: grid; gap: 8px; align-content: start; }
+    .field.full { grid-column: 1 / -1; }
+    label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px 15px;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.012));
+      color: var(--text);
+      outline: none;
+      transition: .16s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--line-strong);
+      box-shadow: 0 0 0 3px rgba(188,214,124,.08);
+    }
+
+    textarea { min-height: 116px; resize: vertical; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line-strong);
+      border-radius: 16px;
+      min-height: 46px;
+      padding: 10px 16px;
+      cursor: pointer;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(188,214,124,.14), rgba(188,214,124,.07));
+      transition: .16s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+    .btn.secondary { background: rgba(255,255,255,.02); border-color: var(--line); color: var(--muted); }
+    .btn.ghost { background: transparent; border-color: var(--line); color: var(--muted); }
+    .btn.warn { background: rgba(226,197,125,.08); border-color: rgba(226,197,125,.24); color: #ebddb6; }
+    .btn.err { background: rgba(226,163,155,.08); border-color: rgba(226,163,155,.24); color: #f1c8c1; }
+    .btn.brand { color: #151812; font-weight: 700; background: linear-gradient(180deg, var(--brand-2), var(--brand)); }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .preset-grid, .mode-grid, .margin-grid, .module-list, .summary { display: grid; gap: 12px; }
+
+    .preset-card, .zone-card, .module, .summary-card, .mode-card, .margin-card {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      overflow: hidden;
+    }
+
+    .preset-card button, .mode-card button {
+      width: 100%;
+      padding: 16px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .preset-card:hover, .mode-card:hover, .module:hover, .zone-card:hover { border-color: var(--line-strong); }
+    .mode-card.active, .preset-card.active { background: linear-gradient(180deg, rgba(188,214,124,.10), rgba(188,214,124,.03)); border-color: var(--line-strong); }
+
+    .zone-card-head, .module-head, .margin-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .zone-card-body, .module-body, .margin-body {
+      padding: 0 16px 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .module-body[hidden], .zone-card-body[hidden] { display: none; }
+
+    .toggle-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 999px;
+      padding: 6px;
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--line);
+    }
+
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      cursor: pointer;
+      transition: .16s ease;
+      flex: 0 0 46px;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      background: #fff;
+      transition: .16s ease;
+    }
+
+    .switch.on { background: rgba(188,214,124,.26); border-color: rgba(188,214,124,.34); }
+    .switch.on::after { left: 21px; background: var(--brand-2); }
+
+    .zone-meta, .module-meta, .summary-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 0 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .tag.required { color: #e5f3df; background: rgba(166,209,143,.08); }
+    .tag.auto { color: #d8e5ff; background: rgba(167,200,255,.08); border-color: rgba(167,200,255,.18); }
+    .tag.optional { color: #ebddb6; background: rgba(226,197,125,.08); border-color: rgba(226,197,125,.18); }
+    .tag.manual { color: var(--text); background: rgba(255,255,255,.04); }
+
+    .summary {
+      padding: 16px;
+    }
+
+    .summary-card { padding: 16px; }
+    .summary-card h4 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+    }
+    .metric { display: grid; gap: 4px; margin-bottom: 14px; }
+    .metric strong { font-size: 28px; letter-spacing: -.04em; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .mini {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      padding: 12px;
+    }
+    .mini b { display: block; font-size: 18px; margin-bottom: 3px; }
+    .mini span { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+    .list, .risk-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .list li, .risk-list li {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .risk-list li.warn { border-color: rgba(226,197,125,.22); color: #ebddb6; }
+    .risk-list li.err { border-color: rgba(226,163,155,.22); color: #f1c8c1; }
+    .risk-list li.ok { border-color: rgba(166,209,143,.22); color: #d4ebca; }
+
+    .spec-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1240px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(188,214,124,.08);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #131814;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    tr:hover td { background: rgba(188,214,124,.025); }
+
+    .table-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+    }
+
+    .table-switch button {
+      min-height: 34px;
+      border-radius: 999px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 14px;
+      cursor: pointer;
+    }
+
+    .table-switch button.active {
+      background: linear-gradient(180deg, rgba(188,214,124,.16), rgba(188,214,124,.06));
+      color: var(--text);
+    }
+
+    .empty-state {
+      border: 1px dashed var(--line-strong);
+      border-radius: 16px;
+      padding: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      background: rgba(255,255,255,.015);
+    }
+
+    .toast-stack {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: min(360px, calc(100vw - 24px));
+      display: grid;
+      gap: 10px;
+      z-index: 120;
+    }
+
+    .toast {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: .18s ease;
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(18,21,19,.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok { border-color: rgba(166,209,143,.24); }
+    .toast.warn { border-color: rgba(226,197,125,.24); }
+    .toast.err { border-color: rgba(226,163,155,.24); }
+
+    @media (max-width: 1480px) {
+      .shell { grid-template-columns: 260px minmax(0, 1fr); }
+      .summary { grid-column: 1 / -1; position: static; }
+    }
+
+    @media (max-width: 1080px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .hero { grid-template-columns: 1fr; }
+      .field-grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 12px; }
+      .field-grid, .field-grid.three, .field-grid.four, .mini-grid { grid-template-columns: 1fr; }
+      .card, .hero { padding: 16px; }
+      .hero h2 { font-size: 24px; }
+      .menu { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <aside class="panel sidebar">
+        <div class="brand">
+          <h1>VIZHU — Presale Configurator v3</h1>
+          <p>
+            Новый конфигуратор объединяет нормализацию зон, внутреннюю инженерную спецификацию,
+            клиентскую упаковку, коэффициенты маржи и шаблоны на основе образца Минтруда.
+          </p>
+        </div>
+        <nav class="menu" id="menu"></nav>
+      </aside>
+
+      <main class="center">
+        <section class="panel hero">
+          <div>
+            <h2>Инженерная модель → коммерческая модель → клиентский пресейл</h2>
+            <p>
+              Конфигуратор сначала собирает структуру объекта по зонам и механикам, затем считает внутреннюю
+              спецификацию, а после этого упаковывает проект в клиентскую модель с распределённой маржой,
+              как в реальном пресейл-файле. Встроен демо-шаблон по Минтруду, но логика остаётся универсальной
+              для других объектов и входящих данных.
+            </p>
+            <div class="hero-tags">
+              <div class="hero-tag">Разделены enabled / expanded</div>
+              <div class="hero-tag">Единый global tier</div>
+              <div class="hero-tag">Внутренняя и клиентская модель</div>
+              <div class="hero-tag">Маржа по категориям</div>
+              <div class="hero-tag">Безопасный рендер текста</div>
+            </div>
+          </div>
+          <div class="hero-aside">
+            <div class="hero-stat">
+              <strong id="heroTier">Средний сегмент</strong>
+              <span id="heroHint">Профиль рассчитывается по бюджету, уровню решения и структуре зон.</span>
+            </div>
+            <div class="inline-actions">
+              <button class="btn brand" id="recalcTop">Пересчитать</button>
+              <button class="btn secondary" id="saveTop">Сохранить</button>
+              <button class="btn ghost" id="exportTop">Excel</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid">
+          <section class="panel card" data-step="preset">
+            <div class="card-head">
+              <div>
+                <h3>Шаблон старта</h3>
+                <div class="muted">Можно начать с пустого объекта или загрузить демо-профиль на основе трёх приложенных файлов.</div>
+              </div>
+            </div>
+            <div class="preset-grid" id="presetGrid"></div>
+          </section>
+
+          <section class="panel card" data-step="project">
+            <div class="card-head">
+              <div>
+                <h3>Паспорт проекта</h3>
+                <div class="muted">Общие параметры влияют на global tier, коэффициенты и клиентскую подачу.</div>
+              </div>
+            </div>
+            <div class="field-grid three">
+              <div class="field full">
+                <label for="projectName">Название проекта</label>
+                <input id="projectName" type="text" placeholder="Например: Карьерный центр — мультимедийное наполнение" />
+              </div>
+              <div class="field">
+                <label for="clientName">Заказчик</label>
+                <input id="clientName" type="text" placeholder="Компания / ведомство / музей" />
+              </div>
+              <div class="field">
+                <label for="ownerName">Ответственный</label>
+                <input id="ownerName" type="text" placeholder="ФИО / отдел" />
+              </div>
+              <div class="field">
+                <label for="projectType">Тип объекта</label>
+                <select id="projectType">
+                  <option value="career-center">Карьерный центр</option>
+                  <option value="museum">Музей / культурный объект</option>
+                  <option value="office">Офис / центр компетенций</option>
+                  <option value="exhibition">Выставка / павильон</option>
+                  <option value="education">Образовательный объект</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="region">Регион</label>
+                <select id="region">
+                  <option value="moscow">Москва / МО</option>
+                  <option value="russia">РФ, регион</option>
+                  <option value="cis">СНГ</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="level">Позиционирование решения</label>
+                <select id="level">
+                  <option value="base">Экономичный</option>
+                  <option value="standard">Оптимальный</option>
+                  <option value="premium">Флагманский</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="calcMode">Глубина расчёта</label>
+                <select id="calcMode">
+                  <option value="express">Быстрый ориентир</option>
+                  <option value="standard">Рабочий пресейл</option>
+                  <option value="detailed">Подробный расчёт</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="budget">Целевой бюджет, ₽</label>
+                <input id="budget" type="number" min="0" step="10000" />
+              </div>
+              <div class="field">
+                <label for="vatIncluded">НДС в клиентской цене</label>
+                <select id="vatIncluded">
+                  <option value="yes">Да, показывать с НДС</option>
+                  <option value="no">Нет, без НДС</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="projectComment">Комментарий / ограничения</label>
+                <textarea id="projectComment" placeholder="Опиши вводные, пожелания, ограничения по брендам, логике маршрута и общие комментарии."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel card" data-step="site">
+            <div class="card-head">
+              <div>
+                <h3>Площадка и коэффициенты</h3>
+                <div class="muted">Эти параметры работают как глобальные множители для инженерки, монтажа и пресейл-упаковки.</div>
+              </div>
+            </div>
+            <div class="field-grid four">
+              <div class="field">
+                <label for="totalArea">Общая площадь объекта, м²</label>
+                <input id="totalArea" type="number" min="0" step="1" />
+              </div>
+              <div class="field">
+                <label for="zoneCountManual">Плановых зон</label>
+                <input id="zoneCountManual" type="number" min="1" step="1" />
+              </div>
+              <div class="field">
+                <label for="ceiling">Средняя высота потолка, м</label>
+                <input id="ceiling" type="number" min="2" step="0.1" />
+              </div>
+              <div class="field">
+                <label for="mountComplexity">Сложность монтажа</label>
+                <select id="mountComplexity">
+                  <option value="normal">Типовая</option>
+                  <option value="hard">Сложная</option>
+                  <option value="veryhard">Очень сложная</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="infrastructure">Исходная инфраструктура</label>
+                <select id="infrastructure">
+                  <option value="ready">В целом готова</option>
+                  <option value="partial">Частично есть</option>
+                  <option value="none">Почти отсутствует</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="commercialMode">Коммерческая упаковка</label>
+                <select id="commercialMode">
+                  <option value="internal">Внутренняя инженерная</option>
+                  <option value="client">Клиентская пресейл</option>
+                  <option value="hybrid">Гибрид</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="currencyMode">Показывать референс дилерской валюты</label>
+                <select id="currencyMode">
+                  <option value="no">Нет</option>
+                  <option value="yes">Да</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="vatRate">НДС, %</label>
+                <input id="vatRate" type="number" min="0" max="100" step="1" />
+              </div>
+            </div>
+          </section>
+
+          <section class="panel card" data-step="zones">
+            <div class="card-head">
+              <div>
+                <h3>Зоны и механики</h3>
+                <div class="muted">Главная сущность нового конфига — сначала зоны и механики, потом оборудование. Для каждой зоны выбирается шаблон и интенсивность.</div>
+              </div>
+              <div class="toolbar-row">
+                <button class="btn secondary" id="addZone">Добавить зону</button>
+                <button class="btn ghost" id="expandZones">Открыть все</button>
+                <button class="btn ghost" id="collapseZones">Свернуть</button>
+              </div>
+            </div>
+            <div id="zoneList"></div>
+          </section>
+
+          <section class="panel card" data-step="systems">
+            <div class="card-head">
+              <div>
+                <h3>Проектные разделы</h3>
+                <div class="muted">Enabled отвечает только за участие раздела в расчёте. Expanded отвечает только за раскрытие карточки.</div>
+              </div>
+              <div class="toolbar-row">
+                <button class="btn ghost" id="expandModules">Открыть всё</button>
+                <button class="btn ghost" id="collapseModules">Свернуть всё</button>
+              </div>
+            </div>
+            <div class="module-list" id="moduleList"></div>
+          </section>
+
+          <section class="panel card" data-step="margin">
+            <div class="card-head">
+              <div>
+                <h3>Коммерческая модель и маржа</h3>
+                <div class="muted">Маржа распределяется по категориям: hardware, content, integration, engineering, site-works. Можно менять профиль прямо в интерфейсе.</div>
+              </div>
+            </div>
+            <div class="margin-grid" id="marginGrid"></div>
+          </section>
+
+          <section class="panel card" data-step="spec">
+            <div class="card-head">
+              <div>
+                <h3>Спецификация</h3>
+                <div class="muted">Есть два представления: внутренняя подробная спецификация и клиентская агрегированная версия, вдохновлённая приложенным пресейл-файлом.</div>
+              </div>
+              <div class="toolbar-row">
+                <div class="table-switch" id="tableSwitch"></div>
+                <button class="btn brand" id="exportSpec">Выгрузить Excel</button>
+              </div>
+            </div>
+            <div class="spec-wrap">
+              <table>
+                <thead>
+                  <tr id="specHead"></tr>
+                </thead>
+                <tbody id="specBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <aside class="panel summary">
+        <div class="summary-card">
+          <h4>Проект</h4>
+          <div class="metric">
+            <strong id="summaryProjectName">Без названия</strong>
+            <span id="summaryMeta">Сводный пресейл-расчёт</span>
+          </div>
+          <div class="badge-row">
+            <span class="chip-tier standard" id="summaryTier">Средний сегмент</span>
+            <span class="chip-soft" id="summaryBudget">0 ₽</span>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <h4>Экономика</h4>
+          <div class="mini-grid">
+            <div class="mini"><b id="summaryPurchase">0 ₽</b><span>Себестоимость</span></div>
+            <div class="mini"><b id="summaryClient">0 ₽</b><span>Клиентская цена</span></div>
+            <div class="mini"><b id="summaryMargin">0 ₽</b><span>Маржа</span></div>
+            <div class="mini"><b id="summaryMarginPct">0%</b><span>Маржинальность</span></div>
+            <div class="mini"><b id="summaryRows">0</b><span>Строк в internal BOM</span></div>
+            <div class="mini"><b id="summaryClientRows">0</b><span>Строк в client view</span></div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <h4>Маржа по слоям</h4>
+          <ul class="list" id="marginList"></ul>
+        </div>
+
+        <div class="summary-card">
+          <h4>Риски и допущения</h4>
+          <ul class="risk-list" id="riskList"></ul>
+        </div>
+
+        <div class="summary-card">
+          <h4>Что учтено</h4>
+          <ul class="list" id="scopeList"></ul>
+        </div>
+
+        <div class="summary-card">
+          <h4>Действия</h4>
+          <div class="toolbar-row">
+            <button class="btn brand" id="recalcSide">Пересчитать</button>
+            <button class="btn secondary" id="saveSide">Сохранить</button>
+            <button class="btn ghost" id="loadDraft">Загрузить</button>
+            <button class="btn warn" id="resetState">Сбросить форму</button>
+            <button class="btn err" id="deleteDraft">Удалить черновик</button>
+          </div>
+          <div class="tiny" style="margin-top:10px;">Сброс формы возвращает дефолтное состояние. Удаление черновика очищает только локально сохранённую копию.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+  <script>
+    const STORAGE_KEY = "vizhu-presale-configurator-v3";
+
+    const menuItems = [
+      { id: "preset", title: "Старт", sub: "Шаблон и режим" },
+      { id: "project", title: "Паспорт", sub: "Проект и бюджет" },
+      { id: "site", title: "Площадка", sub: "Коэффициенты и режим" },
+      { id: "zones", title: "Зоны", sub: "Маршрут и механики" },
+      { id: "systems", title: "Разделы", sub: "Модули и logic" },
+      { id: "margin", title: "Маржа", sub: "Категории и markup" },
+      { id: "spec", title: "Спецификация", sub: "Internal / client" }
+    ];
+
+    const zoneTemplates = {
+      entrance: {
+        type: "public",
+        scenario: "Приветствие, первая коммуникация, навигация, вау-эффект",
+        mechanics: ["led-wall", "welcome-content", "navigation-ui"],
+        defaults: { led: 1, content: 1, interaction: 0.3, audio: 0.2, control: 0.2, network: 0.2 }
+      },
+      recreation: {
+        type: "public",
+        scenario: "Ожидание, свободное пребывание, обзор контента",
+        mechanics: ["ambient-content", "distributed-audio", "light-navigation"],
+        defaults: { led: 0.7, content: 0.5, interaction: 0.2, audio: 0.5, control: 0.15, network: 0.2 }
+      },
+      testing: {
+        type: "interactive",
+        scenario: "Индивидуальное или групповое тестирование, профдиагностика, интерактивные сценарии",
+        mechanics: ["touch-stations", "ui-content", "analytics"],
+        defaults: { led: 0.15, content: 0.7, interaction: 1, audio: 0.15, control: 0.25, network: 0.35 }
+      },
+      orientation: {
+        type: "interactive",
+        scenario: "Профориентация, цифровой маршрут, вовлечение",
+        mechanics: ["interactive-panels", "storytelling", "data-visuals"],
+        defaults: { led: 0.25, content: 0.8, interaction: 0.95, audio: 0.2, control: 0.3, network: 0.3 }
+      },
+      employers: {
+        type: "presentation",
+        scenario: "Презентация работодателей и образовательных траекторий",
+        mechanics: ["digital-showcase", "catalog-ui", "loop-content"],
+        defaults: { led: 0.45, content: 0.6, interaction: 0.6, audio: 0.15, control: 0.2, network: 0.25 }
+      },
+      vr: {
+        type: "immersive",
+        scenario: "VR-тренажёры, контролируемое взаимодействие, контент высокой сложности",
+        mechanics: ["vr-simulation", "operator-control", "high-spec-compute"],
+        defaults: { led: 0.1, content: 1, interaction: 1.2, audio: 0.3, control: 0.45, network: 0.45 }
+      },
+      cinema5d: {
+        type: "immersive",
+        scenario: "5D кинотеатр, групповое погружение, синхронизация видео/аудио/эффектов",
+        mechanics: ["projection-or-led", "immersive-audio", "motion-platform"],
+        defaults: { led: 1.15, content: 1, interaction: 0.75, audio: 1, control: 0.6, network: 0.4 }
+      },
+      club: {
+        type: "event",
+        scenario: "Клубное пространство, лекции, выступления, сценическая коммуникация",
+        mechanics: ["presentation-screen", "scene-audio", "operator-control"],
+        defaults: { led: 0.65, content: 0.5, interaction: 0.35, audio: 0.9, control: 0.5, network: 0.25 }
+      },
+      creator: {
+        type: "studio",
+        scenario: "Подкастная / влогерская / контент-производство",
+        mechanics: ["studio-light", "capture-audio", "content-pipeline"],
+        defaults: { led: 0.2, content: 0.45, interaction: 0.2, audio: 0.9, control: 0.2, network: 0.3 }
+      },
+      work: {
+        type: "support",
+        scenario: "Индивидуальная работа, спокойный сценарий, сервисный AV-слой",
+        mechanics: ["desktop-media", "booking-ui"],
+        defaults: { led: 0.15, content: 0.15, interaction: 0.2, audio: 0.1, control: 0.1, network: 0.25 }
+      },
+      backoffice: {
+        type: "service",
+        scenario: "Офисы, серверная, гардероб, техкоридоры, сервисные помещения",
+        mechanics: ["network-core", "power-core"],
+        defaults: { led: 0, content: 0, interaction: 0, audio: 0.05, control: 0.05, network: 0.7 }
+      }
+    };
+
+    const systemDefinitions = [
+      {
+        id: "led",
+        title: "LED / экраны",
+        description: "Видеостены, цифровые плоскости, welcome и event-экраны.",
+        enabled: true,
+        expanded: true,
+        baseRate: 235000,
+        category: "hardware",
+        fields: [
+          { key: "pixelPitch", label: "Базовый шаг пикселя", type: "select", value: "P2.6", options: ["P1.5", "P1.9", "P2.6", "P3.9", "P4.0"] },
+          { key: "mountType", label: "Тип монтажа", type: "select", value: "wall", options: ["wall", "truss", "custom"] },
+          { key: "reservePercent", label: "Резерв, %", type: "number", min: 0, max: 50, step: 1, value: 5 }
+        ]
+      },
+      {
+        id: "audio",
+        title: "Акустика",
+        description: "Фоновое, сценическое и иммерсивное озвучивание.",
+        enabled: true,
+        expanded: true,
+        baseRate: 36000,
+        category: "hardware",
+        fields: [
+          { key: "quality", label: "Класс акустики", type: "select", value: "standard", options: ["basic", "standard", "premium"] },
+          { key: "subwoofers", label: "Сабвуферы", type: "select", value: "yes", options: ["yes", "no"] },
+          { key: "coverage", label: "Плотность покрытия", type: "select", value: "standard", options: ["basic", "standard", "extended"] }
+        ]
+      },
+      {
+        id: "control",
+        title: "Управление",
+        description: "AV-управление, панели, сценарии и операторские интерфейсы.",
+        enabled: true,
+        expanded: true,
+        baseRate: 210000,
+        category: "integration",
+        fields: [
+          { key: "architecture", label: "Архитектура", type: "select", value: "hybrid", options: ["basic", "hybrid", "full-ip"] },
+          { key: "panelCount", label: "Панелей по умолчанию", type: "number", min: 1, max: 20, step: 1, value: 2 },
+          { key: "operatorUi", label: "Операторский интерфейс", type: "select", value: "yes", options: ["yes", "no"] }
+        ]
+      },
+      {
+        id: "network",
+        title: "Сеть и шкафы",
+        description: "Коммутация, core-switches, racks, UPS и сервисный backbone.",
+        enabled: true,
+        expanded: false,
+        baseRate: 62000,
+        category: "hardware",
+        fields: [
+          { key: "switchClass", label: "Класс коммутаторов", type: "select", value: "managed", options: ["simple", "managed", "enterprise"] },
+          { key: "rackUnits", label: "Размер шкафа, U", type: "number", min: 6, max: 48, step: 1, value: 24 },
+          { key: "ups", label: "UPS", type: "select", value: "yes", options: ["yes", "no"] }
+        ]
+      },
+      {
+        id: "interactive",
+        title: "Интерактив",
+        description: "Touch-станции, киоски, интерактивные панели и периферия.",
+        enabled: true,
+        expanded: true,
+        baseRate: 208000,
+        category: "hardware",
+        fields: [
+          { key: "displaySize", label: "Диагональ", type: "select", value: "65", options: ["43", "55", "65", "75"] },
+          { key: "format", label: "Формат", type: "select", value: "wall", options: ["wall", "kiosk"] },
+          { key: "ops", label: "Встроенный плеер / OPS", type: "select", value: "yes", options: ["yes", "no"] }
+        ]
+      },
+      {
+        id: "content",
+        title: "Контент",
+        description: "2D/3D ролики, UI, сценарии, 3D naked-eye, VR и motion content.",
+        enabled: true,
+        expanded: true,
+        baseRate: 1800000,
+        category: "content",
+        fields: [
+          { key: "complexity", label: "Сложность контента", type: "select", value: "standard", options: ["basic", "standard", "high", "immersive"] },
+          { key: "duration", label: "Минут полезного контента", type: "number", min: 1, max: 60, step: 1, value: 6 },
+          { key: "languageSet", label: "Языковых версий", type: "number", min: 1, max: 5, step: 1, value: 1 }
+        ]
+      },
+      {
+        id: "power",
+        title: "Электрика, монтаж, ПНР",
+        description: "Сопутствующие инженерные работы, расходники, резерв питания, монтаж и ПНР.",
+        enabled: true,
+        expanded: false,
+        baseRate: 1,
+        category: "site-works",
+        fields: [
+          { key: "pnrDays", label: "Дней ПНР", type: "number", min: 1, max: 60, step: 1, value: 5 },
+          { key: "materialsPct", label: "Расходники, % к hardware", type: "number", min: 0, max: 100, step: 1, value: 15 },
+          { key: "installPct", label: "Монтаж, % к hardware", type: "number", min: 0, max: 100, step: 1, value: 20 }
+        ]
+      }
+    ];
+
+    const defaultMarginModel = {
+      hardware: { label: "Оборудование", markup: 0.35, clientPackaging: 0.00, vatSensitive: true },
+      content: { label: "Контент", markup: 0.55, clientPackaging: 0.00, vatSensitive: true },
+      integration: { label: "Интеграция / ПО / управление", markup: 0.42, clientPackaging: 0.00, vatSensitive: true },
+      engineering: { label: "Инженерия / пресейл / проектирование", markup: 0.50, clientPackaging: 0.00, vatSensitive: true },
+      "site-works": { label: "Монтаж / ПНР / расходники", markup: 0.30, clientPackaging: 0.00, vatSensitive: true }
+    };
+
+    const presets = {
+      blank: {
+        key: "blank",
+        title: "Пустой шаблон",
+        sub: "Универсальный старт без зон и демо-данных",
+        apply() {
+          resetState(false);
+          showToast("Загружен пустой шаблон.", "ok");
+        }
+      },
+      mintrud: {
+        key: "mintrud",
+        title: "Минтруд — демо по 3 файлам",
+        sub: "Зоны из PDF, сметная логика и client packaging по образцу",
+        apply() {
+          resetState(false);
+          state.project.projectName = 'Разработка проекта мультимедийного наполнения карьерных центров «Работа молодёжи России»';
+          state.project.clientName = 'Министерство труда и социальной защиты РФ';
+          state.project.ownerName = 'Илья Фаизов';
+          state.project.projectType = 'career-center';
+          state.project.region = 'moscow';
+          state.project.level = 'standard';
+          state.project.calcMode = 'detailed';
+          state.project.budget = 120000000;
+          state.project.totalArea = 971.15;
+          state.project.zoneCountManual = 15;
+          state.project.ceiling = 4.5;
+          state.project.mountComplexity = 'hard';
+          state.project.infrastructure = 'partial';
+          state.project.commercialMode = 'client';
+          state.project.currencyMode = 'yes';
+          state.project.vatIncluded = 'yes';
+          state.project.vatRate = 20;
+          state.project.projectComment = 'Демо-профиль собран по трём приложенным файлам: схема зонирования, внутренняя смета и клиентская presale-версия. Использовать как образец логики, а не как жёсткий шаблон для всех будущих проектов.';
+          state.zones = [
+            makeZone({ name: 'Входная зона', templateId: 'entrance', area: 97.5, intensity: 1, enabled: true, expanded: true, scenarioNote: 'Приветствие, welcome-контент, навигация, входной digital wow.' }),
+            makeZone({ name: 'Рекреация', templateId: 'recreation', area: 269.1, intensity: 1.15, enabled: true, expanded: true, scenarioNote: 'Зона ожидания и обзорный маршрут; внутри — VR-тренажёры как самостоятельная подзона.' }),
+            makeZone({ name: 'Зона профтестирования', templateId: 'testing', area: 85.3, intensity: 1, enabled: true, expanded: false }),
+            makeZone({ name: 'Зона профориентации', templateId: 'orientation', area: 54.74, intensity: 1, enabled: true, expanded: false }),
+            makeZone({ name: 'Зона образовательных учреждений', templateId: 'employers', area: 50.49, intensity: 0.9, enabled: true, expanded: false }),
+            makeZone({ name: 'Зона работодателей', templateId: 'employers', area: 50.49, intensity: 1, enabled: true, expanded: false }),
+            makeZone({ name: '5D Кинотеатр', templateId: 'cinema5d', area: 123.48, intensity: 1.2, enabled: true, expanded: true, scenarioNote: 'Групповое погружение, синхронизация видео, аудио и спецэффектов.' }),
+            makeZone({ name: 'Зона VR-тренажёров', templateId: 'vr', area: 34.04, intensity: 1.1, enabled: true, expanded: true }),
+            makeZone({ name: 'Клубное пространство', templateId: 'club', area: 101.2, intensity: 1.1, enabled: true, expanded: false }),
+            makeZone({ name: 'Подкастная / Влогерская', templateId: 'creator', area: 6, intensity: 0.85, enabled: true, expanded: false }),
+            makeZone({ name: 'Игровая', templateId: 'orientation', area: 11.64, intensity: 0.75, enabled: true, expanded: false, scenarioNote: 'Игровой touch-слой для детской аудитории.' }),
+            makeZone({ name: 'Пространство для индивидуальной работы', templateId: 'work', area: 20.77, intensity: 0.6, enabled: true, expanded: false }),
+            makeZone({ name: 'Пространство «Твой регион. Твой выбор»', templateId: 'orientation', area: 28.54, intensity: 0.8, enabled: true, expanded: false }),
+            makeZone({ name: 'Офисы / серверная / техзоны', templateId: 'backoffice', area: 67.08, intensity: 1, enabled: true, expanded: false, scenarioNote: 'Суммарный service layer по офисам, серверной, гардеробу, техкоридорам и вспомогательным помещениям.' })
+          ];
+          setField('led', 'pixelPitch', 'P2.6');
+          setField('audio', 'quality', 'standard');
+          setField('control', 'architecture', 'hybrid');
+          setField('network', 'switchClass', 'managed');
+          setField('content', 'complexity', 'high');
+          setField('power', 'pnrDays', 8);
+          setField('power', 'materialsPct', 15);
+          setField('power', 'installPct', 20);
+          renderAll();
+          showToast('Загружен демо-профиль по Минтруду.', 'ok');
+        }
+      }
+    };
+
+    const state = createDefaultState();
+    let currentTableMode = 'internal';
+
+    function createDefaultState() {
+      return {
+        project: {
+          projectName: '',
+          clientName: '',
+          ownerName: '',
+          projectType: 'museum',
+          region: 'moscow',
+          level: 'standard',
+          calcMode: 'standard',
+          budget: 12000000,
+          totalArea: 300,
+          zoneCountManual: 3,
+          ceiling: 4.2,
+          mountComplexity: 'normal',
+          infrastructure: 'partial',
+          commercialMode: 'client',
+          currencyMode: 'no',
+          vatIncluded: 'yes',
+          vatRate: 20,
+          projectComment: ''
+        },
+        systems: JSON.parse(JSON.stringify(systemDefinitions)),
+        marginModel: JSON.parse(JSON.stringify(defaultMarginModel)),
+        zones: [
+          makeZone({ name: 'Входная группа', templateId: 'entrance', area: 80, intensity: 1, enabled: true, expanded: true }),
+          makeZone({ name: 'Основная public-зона', templateId: 'recreation', area: 140, intensity: 1, enabled: true, expanded: false }),
+          makeZone({ name: 'Интерактивная зона', templateId: 'orientation', area: 80, intensity: 1, enabled: true, expanded: false })
+        ],
+        results: {
+          internalRows: [],
+          clientRows: [],
+          risks: [],
+          scope: [],
+          marginBreakdown: []
+        },
+        ui: {
+          activeMenu: 'preset'
+        }
+      };
+    }
+
+    function uid() {
+      return 'id-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function makeZone(partial = {}) {
+      const templateId = partial.templateId || 'entrance';
+      const tpl = zoneTemplates[templateId] || zoneTemplates.entrance;
+      return {
+        id: partial.id || uid(),
+        name: partial.name || 'Новая зона',
+        templateId,
+        area: clampNumber(partial.area ?? 50, 1, 100000),
+        intensity: clampNumber(partial.intensity ?? 1, 0.2, 3),
+        visitorLoad: clampNumber(partial.visitorLoad ?? 1, 0.5, 3),
+        enabled: partial.enabled ?? true,
+        expanded: partial.expanded ?? false,
+        mechanics: Array.isArray(partial.mechanics) && partial.mechanics.length ? [...partial.mechanics] : [...tpl.mechanics],
+        scenarioNote: partial.scenarioNote || '',
+        profile: { ...tpl.defaults, ...(partial.profile || {}) }
+      };
+    }
+
+    const rub = value => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(Number(value || 0));
+    const numFmt = (value, digits = 0) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(Number(value || 0));
+    const pctFmt = value => `${numFmt(value, 1)}%`;
+    const clampNumber = (value, min = 0, max = Infinity) => {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, n));
+    };
+
+    function showToast(message, tone = 'ok') {
+      const stack = document.getElementById('toastStack');
+      const toast = document.createElement('div');
+      toast.className = `toast ${tone}`;
+      toast.textContent = message;
+      stack.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 180);
+      }, 3200);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function sanitizeFileName(name) {
+      const safe = (name || 'vizhu-presale')
+        .replace(/[\\/:*?"<>|]+/g, '_')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return safe || 'vizhu-presale';
+    }
+
+    function optionLabel(value) {
+      const map = {
+        basic: 'Базовая',
+        standard: 'Стандартная',
+        premium: 'Премиальная',
+        immersive: 'Иммерсивная',
+        wall: 'Настенный',
+        truss: 'На ферме',
+        custom: 'Нестандартный',
+        yes: 'Да',
+        no: 'Нет',
+        managed: 'Managed',
+        enterprise: 'Enterprise',
+        simple: 'Simple',
+        hybrid: 'Гибридная',
+        'full-ip': 'Полный IP',
+        express: 'Быстрый ориентир',
+        detailed: 'Подробный расчёт',
+        internal: 'Внутренняя инженерная',
+        client: 'Клиентская пресейл',
+        public: 'Публичная',
+        interactive: 'Интерактивная',
+        immersive: 'Иммерсивная',
+        support: 'Сервисная',
+        career-center: 'Карьерный центр',
+        museum: 'Музей / культурный объект',
+        office: 'Офис / центр компетенций',
+        exhibition: 'Выставка / павильон',
+        education: 'Образовательный объект',
+        moscow: 'Москва / МО',
+        russia: 'РФ, регион',
+        cis: 'СНГ',
+        kiosk: 'Стойка / kiosk'
+      };
+      return map[value] || value;
+    }
+
+    function tierOrder(tier) {
+      return { budget: 0, standard: 1, premium: 2 }[tier] ?? 1;
+    }
+
+    function levelToTier(level) {
+      return { base: 'budget', standard: 'standard', premium: 'premium' }[level] || 'standard';
+    }
+
+    function budgetToTier() {
+      const b = clampNumber(state.project.budget, 0);
+      if (b > 0 && b < 7000000) return 'budget';
+      if (b >= 35000000) return 'premium';
+      return 'standard';
+    }
+
+    function resolveGlobalTier() {
+      let tier = budgetToTier();
+      const levelTier = levelToTier(state.project.level);
+      if (tierOrder(levelTier) > tierOrder(tier)) tier = levelTier;
+
+      const immersiveZones = state.zones.filter(z => z.enabled && ['vr', 'cinema5d'].includes(z.templateId)).length;
+      if (immersiveZones >= 2 && tier === 'budget') tier = 'standard';
+      if (immersiveZones >= 2 && state.project.budget >= 25000000) tier = 'premium';
+
+      const bigPublicArea = state.zones.filter(z => z.enabled).reduce((sum, z) => sum + z.area, 0);
+      if (bigPublicArea > 900 && tier === 'budget') tier = 'standard';
+      return tier;
+    }
+
+    function tierLabel(tier) {
+      return { budget: 'Бюджетный', standard: 'Средний', premium: 'Премиальный' }[tier] || 'Средний';
+    }
+
+    function getRegionFactor() {
+      return { moscow: 1, russia: 1.06, cis: 1.12 }[state.project.region] || 1;
+    }
+    function getComplexityFactor() {
+      return { normal: 1, hard: 1.12, veryhard: 1.24 }[state.project.mountComplexity] || 1;
+    }
+    function getInfrastructureFactor() {
+      return { ready: 0.94, partial: 1, none: 1.12 }[state.project.infrastructure] || 1;
+    }
+    function getModeFactor() {
+      return { express: 1.04, standard: 1.1, detailed: 1.18 }[state.project.calcMode] || 1.1;
+    }
+    function getVatFactor() {
+      const rate = clampNumber(state.project.vatRate, 0, 100) / 100;
+      return state.project.vatIncluded === 'yes' ? (1 + rate) : 1;
+    }
+
+    function setField(systemId, key, value) {
+      const system = state.systems.find(s => s.id === systemId);
+      if (!system) return;
+      const field = system.fields.find(f => f.key === key);
+      if (!field) return;
+      if (field.type === 'number') {
+        field.value = clampNumber(value, field.min ?? 0, field.max ?? Infinity);
+      } else {
+        field.value = value;
+      }
+    }
+
+    function getField(systemId, key) {
+      return state.systems.find(s => s.id === systemId)?.fields.find(f => f.key === key)?.value;
+    }
+
+    function renderMenu() {
+      const menu = document.getElementById('menu');
+      menu.innerHTML = menuItems.map(item => `
+        <button data-target="${item.id}" class="${state.ui.activeMenu === item.id ? 'active' : ''}">
+          <span class="title">${item.title}</span>
+          <span class="sub">${item.sub}</span>
+        </button>
+      `).join('');
+
+      menu.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.ui.activeMenu = btn.dataset.target;
+          renderMenu();
+          const target = document.querySelector(`[data-step="${btn.dataset.target}"]`);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+    }
+
+    function initSectionObserver() {
+      const sections = document.querySelectorAll('[data-step]');
+      const observer = new IntersectionObserver(entries => {
+        const visible = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          state.ui.activeMenu = visible.target.dataset.step;
+          renderMenu();
+        }
+      }, { rootMargin: '-15% 0px -65% 0px', threshold: [0.1, 0.3, 0.6] });
+      sections.forEach(section => observer.observe(section));
+    }
+
+    function renderPresetGrid() {
+      const grid = document.getElementById('presetGrid');
+      grid.innerHTML = Object.values(presets).map(p => `
+        <div class="preset-card" data-preset="${p.key}">
+          <button type="button">
+            <strong style="display:block;font-size:15px;margin-bottom:6px;">${escapeHtml(p.title)}</strong>
+            <span class="muted">${escapeHtml(p.sub)}</span>
+          </button>
+        </div>
+      `).join('');
+      grid.querySelectorAll('[data-preset]').forEach(card => {
+        card.addEventListener('click', () => presets[card.dataset.preset]?.apply());
+      });
+    }
+
+    function bindProjectFields() {
+      const ids = ['projectName','clientName','ownerName','projectType','region','level','calcMode','budget','vatIncluded','projectComment','totalArea','zoneCountManual','ceiling','mountComplexity','infrastructure','commercialMode','currencyMode','vatRate'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', () => handleProjectField(el));
+        el.addEventListener('change', () => handleProjectField(el));
+      });
+    }
+
+    function handleProjectField(el) {
+      const id = el.id;
+      if (el.type === 'number') {
+        const bounds = {
+          budget: [0, 10000000000],
+          totalArea: [0, 100000],
+          zoneCountManual: [1, 999],
+          ceiling: [2, 30],
+          vatRate: [0, 100]
+        };
+        const [min, max] = bounds[id] || [0, Infinity];
+        state.project[id] = clampNumber(el.value, min, max);
+        el.value = state.project[id];
+      } else {
+        state.project[id] = el.value;
+      }
+      if (id === 'commercialMode') {
+        currentTableMode = state.project.commercialMode === 'internal' ? 'internal' : 'client';
+      }
+      calculate();
+    }
+
+    function renderZones() {
+      const list = document.getElementById('zoneList');
+      list.innerHTML = '';
+      if (!state.zones.length) {
+        list.innerHTML = '<div class="empty-state">Пока нет зон. Добавь хотя бы одну зону, чтобы считать механику и оборудование.</div>';
+        return;
+      }
+
+      state.zones.forEach((zone, index) => {
+        const tpl = zoneTemplates[zone.templateId] || zoneTemplates.entrance;
+        const card = document.createElement('div');
+        card.className = 'zone-card';
+        card.innerHTML = `
+          <div class="zone-card-head">
+            <div>
+              <strong style="display:block;font-size:16px;margin-bottom:6px;">${escapeHtml(zone.name)}</strong>
+              <div class="zone-meta">
+                <span class="chip">${numFmt(zone.area, 1)} м²</span>
+                <span class="chip">${escapeHtml(optionLabel(tpl.type))}</span>
+                <span class="chip">интенсивность ×${numFmt(zone.intensity, 1)}</span>
+              </div>
+            </div>
+            <div class="toolbar-row">
+              <div class="toggle-inline">
+                <span class="tiny">В расчёте</span>
+                <button type="button" class="switch ${zone.enabled ? 'on' : ''}" data-action="toggle-zone-enabled" data-id="${zone.id}" aria-label="toggle zone"></button>
+              </div>
+              <button class="btn secondary" type="button" data-action="toggle-zone-expanded" data-id="${zone.id}">${zone.expanded ? 'Свернуть' : 'Открыть'}</button>
+              <button class="btn ghost" type="button" data-action="clone-zone" data-id="${zone.id}">Дубль</button>
+              <button class="btn err" type="button" data-action="delete-zone" data-id="${zone.id}">Удалить</button>
+            </div>
+          </div>
+          <div class="zone-card-body" ${zone.expanded ? '' : 'hidden'}>
+            <div class="field-grid three">
+              <div class="field">
+                <label>Название зоны</label>
+                <input data-zone-field="name" data-id="${zone.id}" type="text" value="${escapeHtml(zone.name)}" />
+              </div>
+              <div class="field">
+                <label>Шаблон</label>
+                <select data-zone-field="templateId" data-id="${zone.id}">
+                  ${Object.entries(zoneTemplates).map(([key, value]) => `<option value="${key}" ${key === zone.templateId ? 'selected' : ''}>${escapeHtml(value.scenario.slice(0, 46))}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Площадь, м²</label>
+                <input data-zone-field="area" data-id="${zone.id}" type="number" min="1" max="100000" step="0.1" value="${zone.area}" />
+              </div>
+              <div class="field">
+                <label>Интенсивность</label>
+                <input data-zone-field="intensity" data-id="${zone.id}" type="number" min="0.2" max="3" step="0.1" value="${zone.intensity}" />
+              </div>
+              <div class="field">
+                <label>Нагрузка / посещаемость</label>
+                <input data-zone-field="visitorLoad" data-id="${zone.id}" type="number" min="0.5" max="3" step="0.1" value="${zone.visitorLoad}" />
+              </div>
+              <div class="field">
+                <label>Тип зоны</label>
+                <input type="text" value="${escapeHtml(optionLabel(tpl.type))}" disabled />
+              </div>
+              <div class="field full">
+                <label>Сценарий</label>
+                <textarea data-zone-field="scenarioNote" data-id="${zone.id}" placeholder="Особенности этой зоны">${escapeHtml(zone.scenarioNote)}</textarea>
+              </div>
+            </div>
+            <div class="field-grid three">
+              <div class="field">
+                <label>LED профиль</label>
+                <input data-zone-profile="led" data-id="${zone.id}" type="number" min="0" max="2" step="0.05" value="${zone.profile.led}" />
+              </div>
+              <div class="field">
+                <label>Audio профиль</label>
+                <input data-zone-profile="audio" data-id="${zone.id}" type="number" min="0" max="2" step="0.05" value="${zone.profile.audio}" />
+              </div>
+              <div class="field">
+                <label>Interaction профиль</label>
+                <input data-zone-profile="interaction" data-id="${zone.id}" type="number" min="0" max="2" step="0.05" value="${zone.profile.interaction}" />
+              </div>
+              <div class="field">
+                <label>Content профиль</label>
+                <input data-zone-profile="content" data-id="${zone.id}" type="number" min="0" max="2" step="0.05" value="${zone.profile.content}" />
+              </div>
+              <div class="field">
+                <label>Control профиль</label>
+                <input data-zone-profile="control" data-id="${zone.id}" type="number" min="0" max="2" step="0.05" value="${zone.profile.control}" />
+              </div>
+              <div class="field">
+                <label>Network профиль</label>
+                <input data-zone-profile="network" data-id="${zone.id}" type="number" min="0" max="2" step="0.05" value="${zone.profile.network}" />
+              </div>
+            </div>
+            <div class="tiny">Базовый шаблон: ${escapeHtml(tpl.scenario)}.</div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      list.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => handleZoneAction(btn.dataset.action, btn.dataset.id));
+      });
+
+      list.querySelectorAll('[data-zone-field]').forEach(el => {
+        el.addEventListener('input', () => updateZoneField(el));
+        el.addEventListener('change', () => updateZoneField(el));
+      });
+
+      list.querySelectorAll('[data-zone-profile]').forEach(el => {
+        el.addEventListener('input', () => updateZoneProfile(el));
+        el.addEventListener('change', () => updateZoneProfile(el));
+      });
+    }
+
+    function handleZoneAction(action, id) {
+      const zone = state.zones.find(z => z.id === id);
+      if (!zone) return;
+      if (action === 'toggle-zone-enabled') zone.enabled = !zone.enabled;
+      if (action === 'toggle-zone-expanded') zone.expanded = !zone.expanded;
+      if (action === 'clone-zone') {
+        const clone = makeZone({ ...structuredCloneZone(zone), id: uid(), name: `${zone.name} — копия`, expanded: true });
+        state.zones.splice(state.zones.indexOf(zone) + 1, 0, clone);
+      }
+      if (action === 'delete-zone') {
+        state.zones = state.zones.filter(z => z.id !== id);
+      }
+      renderZones();
+      calculate();
+    }
+
+    function structuredCloneZone(zone) {
+      return JSON.parse(JSON.stringify(zone));
+    }
+
+    function updateZoneField(el) {
+      const zone = state.zones.find(z => z.id === el.dataset.id);
+      if (!zone) return;
+      const field = el.dataset.zoneField;
+      if (field === 'templateId') {
+        zone.templateId = el.value;
+        const tpl = zoneTemplates[zone.templateId] || zoneTemplates.entrance;
+        zone.profile = { ...tpl.defaults };
+      } else if (field === 'area') {
+        zone.area = clampNumber(el.value, 1, 100000);
+        el.value = zone.area;
+      } else if (field === 'intensity') {
+        zone.intensity = clampNumber(el.value, 0.2, 3);
+        el.value = zone.intensity;
+      } else if (field === 'visitorLoad') {
+        zone.visitorLoad = clampNumber(el.value, 0.5, 3);
+        el.value = zone.visitorLoad;
+      } else {
+        zone[field] = el.value;
+      }
+      renderZones();
+      calculate();
+    }
+
+    function updateZoneProfile(el) {
+      const zone = state.zones.find(z => z.id === el.dataset.id);
+      if (!zone) return;
+      zone.profile[el.dataset.zoneProfile] = clampNumber(el.value, 0, 2);
+      el.value = zone.profile[el.dataset.zoneProfile];
+      calculate();
+    }
+
+    function renderModules() {
+      const wrap = document.getElementById('moduleList');
+      wrap.innerHTML = '';
+      state.systems.forEach(system => {
+        const card = document.createElement('div');
+        card.className = 'module';
+        card.innerHTML = `
+          <div class="module-head">
+            <div>
+              <strong style="display:block;font-size:16px;margin-bottom:5px;">${escapeHtml(system.title)}</strong>
+              <div class="muted">${escapeHtml(system.description)}</div>
+              <div class="module-meta" style="margin-top:10px;">
+                <span class="chip">${escapeHtml(state.marginModel[system.category].label)}</span>
+                <span class="chip">base rate ${rub(system.baseRate)}</span>
+              </div>
+            </div>
+            <div class="toolbar-row">
+              <div class="toggle-inline">
+                <span class="tiny">В расчёте</span>
+                <button type="button" class="switch ${system.enabled ? 'on' : ''}" data-system-action="toggle-enabled" data-id="${system.id}"></button>
+              </div>
+              <button class="btn secondary" type="button" data-system-action="toggle-expanded" data-id="${system.id}">${system.expanded ? 'Свернуть' : 'Открыть'}</button>
+            </div>
+          </div>
+          <div class="module-body" ${system.expanded ? '' : 'hidden'}>
+            <div class="field-grid three">
+              ${system.fields.map(field => {
+                if (field.type === 'select') {
+                  return `<div class="field"><label>${escapeHtml(field.label)}</label><select data-system-field="${field.key}" data-system-id="${system.id}">${field.options.map(opt => `<option value="${opt}" ${String(opt) === String(field.value) ? 'selected' : ''}>${escapeHtml(optionLabel(opt))}</option>`).join('')}</select></div>`;
+                }
+                return `<div class="field"><label>${escapeHtml(field.label)}</label><input data-system-field="${field.key}" data-system-id="${system.id}" type="number" min="${field.min ?? 0}" max="${field.max ?? 999999}" step="${field.step ?? 1}" value="${field.value}" /></div>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+
+      wrap.querySelectorAll('[data-system-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const system = state.systems.find(s => s.id === btn.dataset.id);
+          if (!system) return;
+          if (btn.dataset.systemAction === 'toggle-enabled') system.enabled = !system.enabled;
+          if (btn.dataset.systemAction === 'toggle-expanded') system.expanded = !system.expanded;
+          renderModules();
+          calculate();
+        });
+      });
+
+      wrap.querySelectorAll('[data-system-field]').forEach(el => {
+        el.addEventListener('input', () => {
+          const field = state.systems.find(s => s.id === el.dataset.systemId)?.fields.find(f => f.key === el.dataset.systemField);
+          if (!field) return;
+          if (field.type === 'number') {
+            setField(el.dataset.systemId, el.dataset.systemField, clampNumber(el.value, field.min ?? 0, field.max ?? Infinity));
+            el.value = getField(el.dataset.systemId, el.dataset.systemField);
+          } else {
+            setField(el.dataset.systemId, el.dataset.systemField, el.value);
+          }
+          calculate();
+        });
+        el.addEventListener('change', () => el.dispatchEvent(new Event('input')));
+      });
+    }
+
+    function renderMarginGrid() {
+      const wrap = document.getElementById('marginGrid');
+      wrap.innerHTML = '';
+      Object.entries(state.marginModel).forEach(([key, value]) => {
+        const card = document.createElement('div');
+        card.className = 'margin-card';
+        card.innerHTML = `
+          <div class="margin-head">
+            <div>
+              <strong style="display:block;font-size:15px;margin-bottom:6px;">${escapeHtml(value.label)}</strong>
+              <div class="tiny">Коэффициент применяется к внутренней себестоимости этой категории.</div>
+            </div>
+          </div>
+          <div class="margin-body">
+            <div class="field-grid three">
+              <div class="field">
+                <label>Markup, %</label>
+                <input data-margin-key="${key}" data-margin-field="markup" type="number" min="0" max="500" step="1" value="${Math.round(value.markup * 100)}" />
+              </div>
+              <div class="field">
+                <label>Доп. packaging, %</label>
+                <input data-margin-key="${key}" data-margin-field="clientPackaging" type="number" min="0" max="500" step="1" value="${Math.round(value.clientPackaging * 100)}" />
+              </div>
+              <div class="field">
+                <label>НДС влияет</label>
+                <select data-margin-key="${key}" data-margin-field="vatSensitive">
+                  <option value="yes" ${value.vatSensitive ? 'selected' : ''}>Да</option>
+                  <option value="no" ${!value.vatSensitive ? 'selected' : ''}>Нет</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+
+      wrap.querySelectorAll('[data-margin-key]').forEach(el => {
+        el.addEventListener('input', () => updateMarginField(el));
+        el.addEventListener('change', () => updateMarginField(el));
+      });
+    }
+
+    function updateMarginField(el) {
+      const model = state.marginModel[el.dataset.marginKey];
+      if (!model) return;
+      const field = el.dataset.marginField;
+      if (field === 'vatSensitive') model.vatSensitive = el.value === 'yes';
+      else model[field] = clampNumber(el.value, 0, 500) / 100;
+      calculate();
+    }
+
+    function renderTableSwitch() {
+      const wrap = document.getElementById('tableSwitch');
+      wrap.innerHTML = `
+        <button class="${currentTableMode === 'internal' ? 'active' : ''}" data-table-mode="internal">Internal</button>
+        <button class="${currentTableMode === 'client' ? 'active' : ''}" data-table-mode="client">Client</button>
+      `;
+      wrap.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+        currentTableMode = btn.dataset.tableMode;
+        renderTableSwitch();
+        renderSpec();
+      }));
+    }
+
+    function getZoneWeight(zone) {
+      return zone.area * zone.intensity * zone.visitorLoad;
+    }
+
+    function buildInternalRows() {
+      const rows = [];
+      const globalTier = resolveGlobalTier();
+      const complexity = getComplexityFactor();
+      const infra = getInfrastructureFactor();
+      const modeFactor = getModeFactor();
+      const tierMultiplier = { budget: 0.88, standard: 1, premium: 1.18 }[globalTier] || 1;
+      const enabledZones = state.zones.filter(z => z.enabled);
+      const enabledSystems = state.systems.filter(s => s.enabled);
+      const activeHardwareBase = [];
+
+      const push = row => rows.push({
+        zone: row.zone,
+        section: row.section,
+        code: row.code,
+        name: row.name,
+        qty: Number((row.qty || 0).toFixed(2)),
+        unit: row.unit || 'шт',
+        category: row.category,
+        purchase: Math.round(row.purchase || 0),
+        client: 0,
+        type: row.type || 'required',
+        reason: row.reason || ''
+      });
+
+      enabledZones.forEach(zone => {
+        const zoneWeight = getZoneWeight(zone);
+        const tpl = zoneTemplates[zone.templateId] || zoneTemplates.entrance;
+
+        if (enabledSystems.find(s => s.id === 'led')) {
+          const pitch = getField('led', 'pixelPitch');
+          const reserve = clampNumber(getField('led', 'reservePercent'), 0, 50) / 100;
+          const mountType = getField('led', 'mountType');
+          const pitchFactor = { 'P1.5': 1.32, 'P1.9': 1.18, 'P2.6': 1, 'P3.9': 0.86, 'P4.0': 0.82 }[pitch] || 1;
+          const mountFactor = mountType === 'custom' ? 1.16 : mountType === 'truss' ? 1.08 : 1;
+          const displayArea = Math.max(0, zone.area * zone.profile.led * 0.16);
+          if (displayArea > 0.4) {
+            const displayPurchase = displayArea * 235000 * tierMultiplier * pitchFactor;
+            push({
+              zone: zone.name,
+              section: 'LED',
+              code: 'LED-DISPLAY',
+              name: `${zone.name} — LED / экранная поверхность`,
+              qty: displayArea,
+              unit: 'м²',
+              category: 'hardware',
+              purchase: displayPurchase,
+              type: 'required',
+              reason: `${tpl.scenario}; профиль ${numFmt(zone.profile.led, 2)}`
+            });
+            activeHardwareBase.push(displayPurchase);
+
+            const metalPurchase = displayArea * (mountType === 'custom' ? 43000 : mountType === 'truss' ? 32000 : 25000) * complexity;
+            push({
+              zone: zone.name,
+              section: 'LED',
+              code: 'LED-MOUNT',
+              name: `${zone.name} — металлоконструкция`,
+              qty: displayArea,
+              unit: 'м²',
+              category: 'site-works',
+              purchase: metalPurchase,
+              type: 'auto',
+              reason: `Монтаж ${optionLabel(mountType)}`
+            });
+
+            const sparePurchase = displayArea * 235000 * reserve * 0.24;
+            if (sparePurchase > 0) {
+              push({
+                zone: zone.name,
+                section: 'LED',
+                code: 'LED-SPARE',
+                name: `${zone.name} — резерв LED`,
+                qty: Math.max(1, Math.round(displayArea * reserve)),
+                unit: 'компл.',
+                category: 'hardware',
+                purchase: sparePurchase,
+                type: 'optional',
+                reason: `Резерв ${Math.round(reserve * 100)}%`
+              });
+              activeHardwareBase.push(sparePurchase);
+            }
+          }
+        }
+
+        if (enabledSystems.find(s => s.id === 'audio')) {
+          const quality = getField('audio', 'quality');
+          const coverage = getField('audio', 'coverage');
+          const subs = getField('audio', 'subwoofers') === 'yes';
+          const coverageFactor = coverage === 'extended' ? 1.3 : coverage === 'basic' ? 0.82 : 1;
+          const qualityFactor = quality === 'premium' ? 1.55 : quality === 'basic' ? 0.74 : 1;
+          const speakerCount = Math.max(0, Math.ceil((zone.area / 42) * zone.profile.audio * coverageFactor));
+          if (speakerCount > 0) {
+            const speakerPurchase = speakerCount * 36000 * qualityFactor * tierMultiplier;
+            push({
+              zone: zone.name,
+              section: 'Audio',
+              code: 'AUD-SPK',
+              name: `${zone.name} — install акустика`,
+              qty: speakerCount,
+              category: 'hardware',
+              purchase: speakerPurchase,
+              type: 'required',
+              reason: `Профиль ${numFmt(zone.profile.audio, 2)}; ${optionLabel(coverage)}`
+            });
+            activeHardwareBase.push(speakerPurchase);
+
+            const dspPurchase = Math.max(1, Math.ceil(speakerCount / 4)) * (quality === 'premium' ? 240000 : quality === 'basic' ? 85000 : 185000);
+            push({
+              zone: zone.name,
+              section: 'Audio',
+              code: 'AUD-DSP',
+              name: `${zone.name} — DSP / усиление`,
+              qty: Math.max(1, Math.ceil(speakerCount / 4)),
+              category: 'integration',
+              purchase: dspPurchase,
+              type: 'auto',
+              reason: 'Подбор по числу точек'
+            });
+
+            if (subs && (zone.templateId === 'cinema5d' || zone.templateId === 'club' || zone.profile.audio > 0.55)) {
+              const subQty = Math.max(1, Math.ceil(zone.area / 110));
+              const subPurchase = subQty * (quality === 'premium' ? 148000 : quality === 'basic' ? 68000 : 92000);
+              push({
+                zone: zone.name,
+                section: 'Audio',
+                code: 'AUD-SUB',
+                name: `${zone.name} — сабвуферы`,
+                qty: subQty,
+                category: 'hardware',
+                purchase: subPurchase,
+                type: 'optional',
+                reason: 'Иммерсивная / event акустика'
+              });
+              activeHardwareBase.push(subPurchase);
+            }
+          }
+        }
+
+        if (enabledSystems.find(s => s.id === 'interactive')) {
+          const format = getField('interactive', 'format');
+          const size = clampNumber(getField('interactive', 'displaySize'), 43, 75);
+          const hasOps = getField('interactive', 'ops') === 'yes';
+          const pointCount = Math.max(0, Math.ceil(zone.profile.interaction * zone.area / 55));
+          if (pointCount > 0) {
+            const sizeFactor = size >= 75 ? 1.22 : size >= 65 ? 1 : size >= 55 ? 0.88 : 0.76;
+            const displayPurchase = pointCount * 208000 * sizeFactor * tierMultiplier;
+            push({
+              zone: zone.name,
+              section: 'Interactive',
+              code: 'INT-DISPLAY',
+              name: `${zone.name} — интерактивный дисплей`,
+              qty: pointCount,
+              category: 'hardware',
+              purchase: displayPurchase,
+              type: 'required',
+              reason: `${pointCount} точек, ${size}\"`
+            });
+            activeHardwareBase.push(displayPurchase);
+
+            const mountPurchase = pointCount * (format === 'kiosk' ? 76000 : 32000);
+            push({
+              zone: zone.name,
+              section: 'Interactive',
+              code: 'INT-MOUNT',
+              name: format === 'kiosk' ? `${zone.name} — стойка / kiosk` : `${zone.name} — настенное крепление`,
+              qty: pointCount,
+              category: 'site-works',
+              purchase: mountPurchase,
+              type: 'auto',
+              reason: optionLabel(format)
+            });
+
+            if (hasOps) {
+              const opsPurchase = pointCount * 62000;
+              push({
+                zone: zone.name,
+                section: 'Interactive',
+                code: 'INT-OPS',
+                name: `${zone.name} — OPS / player`,
+                qty: pointCount,
+                category: 'hardware',
+                purchase: opsPurchase,
+                type: 'auto',
+                reason: 'Плеер под UI / контент'
+              });
+              activeHardwareBase.push(opsPurchase);
+            }
+          }
+        }
+
+        if (enabledSystems.find(s => s.id === 'content')) {
+          const complexityLevel = getField('content', 'complexity');
+          const duration = clampNumber(getField('content', 'duration'), 1, 60);
+          const languageSet = clampNumber(getField('content', 'languageSet'), 1, 5);
+          const complexityFactor = { basic: 0.55, standard: 1, high: 1.35, immersive: 1.8 }[complexityLevel] || 1;
+          const templateFactor = zone.templateId === 'vr' ? 1.6 : zone.templateId === 'cinema5d' ? 1.8 : zone.templateId === 'entrance' ? 1.15 : 1;
+          const contentPurchase = 420000 * zone.profile.content * zone.intensity * complexityFactor * templateFactor * (0.55 + duration / 12) * (1 + (languageSet - 1) * 0.16);
+          if (contentPurchase > 10000) {
+            push({
+              zone: zone.name,
+              section: 'Content',
+              code: 'CNT-STORY',
+              name: `${zone.name} — сценарии / ролики / UI`,
+              qty: 1,
+              category: 'content',
+              purchase: contentPurchase,
+              type: 'required',
+              reason: `${optionLabel(complexityLevel)}, ${duration} мин, языков ${languageSet}`
+            });
+          }
+        }
+
+        if (enabledSystems.find(s => s.id === 'control')) {
+          const architecture = getField('control', 'architecture');
+          const panelCount = clampNumber(getField('control', 'panelCount'), 1, 20);
+          const operatorUi = getField('control', 'operatorUi') === 'yes';
+          const controlNeed = zone.profile.control * zone.intensity;
+          if (controlNeed > 0.08) {
+            const archFactor = architecture === 'full-ip' ? 1.16 : architecture === 'basic' ? 0.84 : 1;
+            const corePurchase = 175000 * archFactor * Math.max(1, Math.ceil(controlNeed));
+            push({
+              zone: zone.name,
+              section: 'Control',
+              code: 'CTL-CORE',
+              name: `${zone.name} — control core`,
+              qty: Math.max(1, Math.ceil(controlNeed)),
+              category: 'integration',
+              purchase: corePurchase,
+              type: 'required',
+              reason: `Архитектура ${optionLabel(architecture)}`
+            });
+
+            const panelQty = Math.min(panelCount, Math.max(1, Math.ceil(zone.profile.control * 2)));
+            const panelPurchase = panelQty * 112000;
+            push({
+              zone: zone.name,
+              section: 'Control',
+              code: 'CTL-PANEL',
+              name: `${zone.name} — пользовательские панели`,
+              qty: panelQty,
+              category: 'hardware',
+              purchase: panelPurchase,
+              type: 'optional',
+              reason: 'UI для локального управления'
+            });
+            activeHardwareBase.push(panelPurchase);
+
+            const logicPurchase = zoneWeight * 420;
+            push({
+              zone: zone.name,
+              section: 'Control',
+              code: 'CTL-LOGIC',
+              name: `${zone.name} — программирование и логика`,
+              qty: 1,
+              category: 'integration',
+              purchase: logicPurchase,
+              type: 'auto',
+              reason: 'Пресеты, сценарии, routing'
+            });
+
+            if (operatorUi && (zone.templateId === 'cinema5d' || zone.templateId === 'club' || zone.templateId === 'vr')) {
+              const operatorPurchase = 96000;
+              push({
+                zone: zone.name,
+                section: 'Control',
+                code: 'CTL-OPS-UI',
+                name: `${zone.name} — операторское рабочее место`,
+                qty: 1,
+                category: 'integration',
+                purchase: operatorPurchase,
+                type: 'auto',
+                reason: 'Требуется операторский контроль'
+              });
+            }
+          }
+        }
+
+        if (enabledSystems.find(s => s.id === 'network')) {
+          const switchClass = getField('network', 'switchClass');
+          const rackUnits = clampNumber(getField('network', 'rackUnits'), 6, 48);
+          const ups = getField('network', 'ups') === 'yes';
+          const nodeFactor = zone.profile.network * zone.intensity;
+          if (nodeFactor > 0.08) {
+            const switchQty = Math.max(1, Math.ceil(nodeFactor * (zone.area > 100 ? 2 : 1)));
+            const switchRate = switchClass === 'enterprise' ? 136000 : switchClass === 'simple' ? 17200 : 62000;
+            const switchPurchase = switchQty * switchRate;
+            push({
+              zone: zone.name,
+              section: 'Network',
+              code: 'NET-SW',
+              name: `${zone.name} — коммутаторы`,
+              qty: switchQty,
+              category: 'hardware',
+              purchase: switchPurchase,
+              type: 'required',
+              reason: `Класс ${optionLabel(switchClass)}`
+            });
+            activeHardwareBase.push(switchPurchase);
+
+            const rackPurchase = (rackUnits <= 24 ? 89000 : 135000) * (zone.templateId === 'backoffice' ? 1 : 0.35);
+            if (rackPurchase > 1000) {
+              push({
+                zone: zone.name,
+                section: 'Network',
+                code: 'NET-RACK',
+                name: `${zone.name} — шкаф / стойка`,
+                qty: 1,
+                category: 'hardware',
+                purchase: rackPurchase,
+                type: 'auto',
+                reason: `${rackUnits}U`
+              });
+              activeHardwareBase.push(rackPurchase);
+            }
+
+            if (ups) {
+              const upsPurchase = switchClass === 'enterprise' ? 186000 : switchClass === 'simple' ? 96000 : 142000;
+              push({
+                zone: zone.name,
+                section: 'Network',
+                code: 'NET-UPS',
+                name: `${zone.name} — UPS`,
+                qty: 1,
+                category: 'hardware',
+                purchase: upsPurchase,
+                type: 'optional',
+                reason: 'Резерв питания сети и AV'
+              });
+              activeHardwareBase.push(upsPurchase);
+            }
+          }
+        }
+      });
+
+      if (state.systems.find(s => s.id === 'power')?.enabled) {
+        const hardwareBase = rows.filter(r => ['hardware', 'integration'].includes(r.category)).reduce((sum, row) => sum + row.purchase, 0);
+        const installPct = clampNumber(getField('power', 'installPct'), 0, 100) / 100;
+        const materialsPct = clampNumber(getField('power', 'materialsPct'), 0, 100) / 100;
+        const pnrDays = clampNumber(getField('power', 'pnrDays'), 1, 60);
+
+        rows.push({
+          zone: 'General',
+          section: 'Power',
+          code: 'PWR-INSTALL',
+          name: 'Монтажные работы',
+          qty: 1,
+          unit: 'компл.',
+          category: 'site-works',
+          purchase: Math.round(hardwareBase * installPct * complexity),
+          client: 0,
+          type: 'required',
+          reason: 'Процент от hardware / integration'
+        });
+        rows.push({
+          zone: 'General',
+          section: 'Power',
+          code: 'PWR-MAT',
+          name: 'Расходные материалы и электрика',
+          qty: 1,
+          unit: 'компл.',
+          category: 'site-works',
+          purchase: Math.round(hardwareBase * materialsPct * infra),
+          client: 0,
+          type: 'required',
+          reason: 'Процент от hardware'
+        });
+        rows.push({
+          zone: 'General',
+          section: 'Power',
+          code: 'PWR-PNR',
+          name: 'Пусконаладочные работы',
+          qty: pnrDays,
+          unit: 'дн.',
+          category: 'site-works',
+          purchase: Math.round(pnrDays * 78000 * complexity),
+          client: 0,
+          type: 'required',
+          reason: `${pnrDays} дней ПНР`
+        });
+      }
+
+      const purchaseBase = rows.reduce((sum, row) => sum + row.purchase, 0);
+      rows.push({
+        zone: 'General',
+        section: 'Engineering',
+        code: 'ENG-PRE',
+        name: 'Инженерная проработка, пресейл и спецификация',
+        qty: 1,
+        unit: 'компл.',
+        category: 'engineering',
+        purchase: Math.round(purchaseBase * 0.038 * modeFactor),
+        client: 0,
+        type: 'required',
+        reason: 'Глубина расчёта и масштаб объекта'
+      });
+
+      return rows.map(row => {
+        const model = state.marginModel[row.category];
+        let client = row.purchase * (1 + model.markup + model.clientPackaging) * getRegionFactor();
+        if (model.vatSensitive) client *= getVatFactor();
+        return { ...row, client: Math.round(client) };
+      });
+    }
+
+    function buildClientRows(internalRows) {
+      const groupMap = new Map();
+      internalRows.forEach(row => {
+        const key = `${row.zone}__${row.section}`;
+        if (!groupMap.has(key)) {
+          groupMap.set(key, {
+            zone: row.zone,
+            block: row.section,
+            equipmentPurchase: 0,
+            contentPurchase: 0,
+            integrationPurchase: 0,
+            sitePurchase: 0,
+            engineeringPurchase: 0,
+            equipmentClient: 0,
+            contentClient: 0,
+            integrationClient: 0,
+            siteClient: 0,
+            engineeringClient: 0,
+            notes: []
+          });
+        }
+        const group = groupMap.get(key);
+        if (row.category === 'hardware') {
+          group.equipmentPurchase += row.purchase;
+          group.equipmentClient += row.client;
+        }
+        if (row.category === 'content') {
+          group.contentPurchase += row.purchase;
+          group.contentClient += row.client;
+        }
+        if (row.category === 'integration') {
+          group.integrationPurchase += row.purchase;
+          group.integrationClient += row.client;
+        }
+        if (row.category === 'site-works') {
+          group.sitePurchase += row.purchase;
+          group.siteClient += row.client;
+        }
+        if (row.category === 'engineering') {
+          group.engineeringPurchase += row.purchase;
+          group.engineeringClient += row.client;
+        }
+        if (row.reason) group.notes.push(row.reason);
+      });
+
+      const rows = [];
+      [...groupMap.values()].forEach(group => {
+        const totalPurchase = group.equipmentPurchase + group.contentPurchase + group.integrationPurchase + group.sitePurchase + group.engineeringPurchase;
+        const totalClient = group.equipmentClient + group.contentClient + group.integrationClient + group.siteClient + group.engineeringClient;
+        rows.push({
+          zone: group.zone,
+          offerItem: `${group.zone} — ${group.block}`,
+          equipmentPurchase: Math.round(group.equipmentPurchase),
+          contentPurchase: Math.round(group.contentPurchase),
+          integrationPurchase: Math.round(group.integrationPurchase),
+          sitePurchase: Math.round(group.sitePurchase),
+          engineeringPurchase: Math.round(group.engineeringPurchase),
+          totalPurchase: Math.round(totalPurchase),
+          totalClient: Math.round(totalClient),
+          margin: Math.round(totalClient - totalPurchase),
+          notes: group.notes.slice(0, 4).join(' · ')
+        });
+      });
+
+      rows.sort((a, b) => b.totalClient - a.totalClient);
+      return rows;
+    }
+
+    function buildRisks(internalRows, clientRows) {
+      const risks = [];
+      const totalClient = clientRows.reduce((sum, row) => sum + row.totalClient, 0);
+      const enabledZones = state.zones.filter(z => z.enabled);
+
+      if (!state.project.projectName.trim()) {
+        risks.push({ text: 'Не указано название проекта — экспорт будет с базовым именем.', type: 'err' });
+      }
+      if (!enabledZones.length) {
+        risks.push({ text: 'Не включена ни одна зона — расчёт теряет смысл.', type: 'err' });
+      }
+      if (state.project.ceiling >= 5.5) {
+        risks.push({ text: 'Высокие потолки могут заметно увеличить металлоконструкции, подвесы и ПНР.', type: 'warn' });
+      }
+      if (state.project.infrastructure === 'none') {
+        risks.push({ text: 'Слабая исходная инфраструктура: после обследования почти наверняка вырастут электрика, трассы и шкафы.', type: 'warn' });
+      }
+      if (state.project.mountComplexity === 'veryhard') {
+        risks.push({ text: 'Очень сложный монтаж — текущий коэффициент ориентировочный, итог нужно подтверждать обследованием.', type: 'err' });
+      }
+      if (state.project.calcMode === 'express') {
+        risks.push({ text: 'Express-режим подходит только для ориентиров; закупочное решение по нему принимать нельзя.', type: 'warn' });
+      }
+      if (state.project.budget > 0 && totalClient > state.project.budget) {
+        risks.push({ text: `Клиентская цена превышает целевой бюджет на ${rub(totalClient - state.project.budget)}.`, type: 'err' });
+      } else if (state.project.budget > 0) {
+        risks.push({ text: 'Текущая конфигурация укладывается в заданный бюджетный коридор.', type: 'ok' });
+      }
+
+      if (enabledZones.some(z => z.templateId === 'cinema5d' || z.templateId === 'vr')) {
+        risks.push({ text: 'Иммерсивные зоны требуют отдельной проверки сценариев, медиасерверной архитектуры и эксплуатационных ограничений.', type: 'warn' });
+      }
+
+      const hasBigContent = internalRows.some(row => row.category === 'content' && row.purchase > 4500000);
+      if (hasBigContent) {
+        risks.push({ text: 'Контентный слой в этом расчёте существенный. Проверь объём ТЗ, ревизий, 3D и языковых версий.', type: 'warn' });
+      }
+      return risks;
+    }
+
+    function buildScope() {
+      const scope = [
+        'Сначала считается инженерная модель по зонам и механикам, затем поверх неё строится клиентская упаковка.',
+        'Маржа распределяется по категориям: оборудование, контент, интеграция, инженерия и site-works.',
+        'Клиентская модель агрегирует строки и скрывает внутреннюю детализацию, как в реальном пресейл-файле.'
+      ];
+      if (state.project.projectComment.trim()) {
+        scope.push(`Комментарий к проекту: ${state.project.projectComment.trim()}`);
+      }
+      return scope;
+    }
+
+    function buildMarginBreakdown(internalRows) {
+      return Object.entries(state.marginModel).map(([key, model]) => {
+        const purchase = internalRows.filter(row => row.category === key).reduce((sum, row) => sum + row.purchase, 0);
+        const client = internalRows.filter(row => row.category === key).reduce((sum, row) => sum + row.client, 0);
+        return {
+          label: model.label,
+          purchase,
+          client,
+          margin: client - purchase,
+          pct: client > 0 ? ((client - purchase) / client) * 100 : 0,
+          markup: model.markup * 100
+        };
+      }).filter(item => item.purchase > 0 || item.client > 0);
+    }
+
+    function calculate() {
+      const internalRows = buildInternalRows();
+      const clientRows = buildClientRows(internalRows);
+      state.results.internalRows = internalRows;
+      state.results.clientRows = clientRows;
+      state.results.risks = buildRisks(internalRows, clientRows);
+      state.results.scope = buildScope();
+      state.results.marginBreakdown = buildMarginBreakdown(internalRows);
+      renderSummary();
+      renderSpec();
+      renderLists();
+      renderTableSwitch();
+    }
+
+    function renderSummary() {
+      const totalPurchase = state.results.internalRows.reduce((sum, row) => sum + row.purchase, 0);
+      const totalClient = state.results.clientRows.reduce((sum, row) => sum + row.totalClient, 0);
+      const margin = totalClient - totalPurchase;
+      const marginPct = totalClient > 0 ? (margin / totalClient) * 100 : 0;
+      const tier = resolveGlobalTier();
+
+      document.getElementById('summaryProjectName').textContent = state.project.projectName.trim() || 'Без названия';
+      document.getElementById('summaryMeta').textContent = `${optionLabel(state.project.projectType)} · ${optionLabel(state.project.calcMode)}`;
+      document.getElementById('summaryBudget').textContent = rub(state.project.budget);
+      const summaryTier = document.getElementById('summaryTier');
+      summaryTier.className = `chip-tier ${tier}`;
+      summaryTier.textContent = `${tierLabel(tier)} сегмент`;
+
+      document.getElementById('heroTier').textContent = `${tierLabel(tier)} сегмент`;
+      document.getElementById('heroHint').textContent = `Бюджет ${rub(state.project.budget)} · ${optionLabel(state.project.level)} класс решения · ${state.zones.filter(z => z.enabled).length} активных зон.`;
+
+      document.getElementById('summaryPurchase').textContent = rub(totalPurchase);
+      document.getElementById('summaryClient').textContent = rub(totalClient);
+      document.getElementById('summaryMargin').textContent = rub(margin);
+      document.getElementById('summaryMarginPct').textContent = pctFmt(marginPct);
+      document.getElementById('summaryRows').textContent = String(state.results.internalRows.length);
+      document.getElementById('summaryClientRows').textContent = String(state.results.clientRows.length);
+
+      const marginList = document.getElementById('marginList');
+      marginList.innerHTML = state.results.marginBreakdown.map(item => `
+        <li>
+          <strong style="display:block;margin-bottom:4px;">${escapeHtml(item.label)}</strong>
+          <div class="tiny">markup ${pctFmt(item.markup)} · purchase ${rub(item.purchase)} · client ${rub(item.client)} · margin ${rub(item.margin)}</div>
+        </li>
+      `).join('');
+    }
+
+    function renderLists() {
+      const riskList = document.getElementById('riskList');
+      riskList.innerHTML = state.results.risks.map(risk => `<li class="${risk.type}">${escapeHtml(risk.text)}</li>`).join('');
+      const scopeList = document.getElementById('scopeList');
+      scopeList.innerHTML = state.results.scope.map(item => `<li>${escapeHtml(item)}</li>`).join('');
+    }
+
+    function renderSpec() {
+      const head = document.getElementById('specHead');
+      const body = document.getElementById('specBody');
+      if (currentTableMode === 'internal') {
+        head.innerHTML = ['Зона','Раздел','Код','Наименование','Кол-во','Ед.','Категория','Себестоимость','Client price','Тип','Основание'].map(x => `<th>${x}</th>`).join('');
+        body.innerHTML = state.results.internalRows.map(row => `
+          <tr>
+            <td>${escapeHtml(row.zone)}</td>
+            <td>${escapeHtml(row.section)}</td>
+            <td>${escapeHtml(row.code)}</td>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${numFmt(row.qty, row.unit === 'м²' ? 2 : (Number.isInteger(row.qty) ? 0 : 2))}</td>
+            <td>${escapeHtml(row.unit)}</td>
+            <td>${escapeHtml(state.marginModel[row.category].label)}</td>
+            <td>${rub(row.purchase)}</td>
+            <td>${rub(row.client)}</td>
+            <td><span class="tag ${row.type}">${escapeHtml(row.type)}</span></td>
+            <td>${escapeHtml(row.reason)}</td>
+          </tr>
+        `).join('');
+      } else {
+        head.innerHTML = ['Зона / блок','Equipment','Content','Integration','Site works','Engineering','Total purchase','Client offer','Margin','Комментарий'].map(x => `<th>${x}</th>`).join('');
+        body.innerHTML = state.results.clientRows.map(row => `
+          <tr>
+            <td>${escapeHtml(row.offerItem)}</td>
+            <td>${rub(row.equipmentPurchase)}</td>
+            <td>${rub(row.contentPurchase)}</td>
+            <td>${rub(row.integrationPurchase)}</td>
+            <td>${rub(row.sitePurchase)}</td>
+            <td>${rub(row.engineeringPurchase)}</td>
+            <td>${rub(row.totalPurchase)}</td>
+            <td>${rub(row.totalClient)}</td>
+            <td>${rub(row.margin)}</td>
+            <td>${escapeHtml(row.notes)}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function syncFieldsFromState() {
+      Object.entries(state.project).forEach(([key, value]) => {
+        const el = document.getElementById(key);
+        if (el) el.value = value;
+      });
+    }
+
+    function renderAll() {
+      syncFieldsFromState();
+      renderMenu();
+      renderPresetGrid();
+      renderZones();
+      renderModules();
+      renderMarginGrid();
+      renderTableSwitch();
+      calculate();
+    }
+
+    function saveDraft() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        showToast('Черновик сохранён.', 'ok');
+      } catch (error) {
+        console.error(error);
+        showToast('Не удалось сохранить черновик.', 'err');
+      }
+    }
+
+    function loadDraft() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        showToast('Сохранённый черновик не найден.', 'warn');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        applyLoadedState(parsed);
+        renderAll();
+        showToast('Черновик загружен.', 'ok');
+      } catch (error) {
+        console.error(error);
+        showToast('Не удалось загрузить черновик.', 'err');
+      }
+    }
+
+    function applyLoadedState(parsed) {
+      const fresh = createDefaultState();
+      state.project = { ...fresh.project, ...(parsed.project || {}) };
+      state.marginModel = deepMergeMargin(parsed.marginModel || fresh.marginModel);
+      state.systems = hydrateSystems(parsed.systems || fresh.systems);
+      state.zones = hydrateZones(parsed.zones || fresh.zones);
+      state.ui = { ...fresh.ui, ...(parsed.ui || {}) };
+      currentTableMode = parsed.project?.commercialMode === 'internal' ? 'internal' : (currentTableMode || 'client');
+    }
+
+    function deepMergeMargin(value) {
+      const merged = JSON.parse(JSON.stringify(defaultMarginModel));
+      Object.keys(merged).forEach(key => {
+        merged[key] = { ...merged[key], ...(value[key] || {}) };
+      });
+      return merged;
+    }
+
+    function hydrateSystems(value) {
+      const base = JSON.parse(JSON.stringify(systemDefinitions));
+      return base.map(system => {
+        const saved = value.find?.(x => x.id === system.id) || {};
+        return {
+          ...system,
+          enabled: saved.enabled ?? system.enabled,
+          expanded: saved.expanded ?? system.expanded,
+          fields: system.fields.map(field => {
+            const savedField = saved.fields?.find?.(x => x.key === field.key) || {};
+            return { ...field, value: savedField.value ?? field.value };
+          })
+        };
+      });
+    }
+
+    function hydrateZones(value) {
+      return (Array.isArray(value) && value.length ? value : createDefaultState().zones).map(item => makeZone(item));
+    }
+
+    function resetState(show = true) {
+      const fresh = createDefaultState();
+      state.project = fresh.project;
+      state.systems = fresh.systems;
+      state.marginModel = fresh.marginModel;
+      state.zones = fresh.zones;
+      state.results = fresh.results;
+      state.ui = fresh.ui;
+      currentTableMode = 'internal';
+      renderAll();
+      if (show) showToast('Форма сброшена к базовому состоянию.', 'ok');
+    }
+
+    function deleteDraft() {
+      localStorage.removeItem(STORAGE_KEY);
+      showToast('Сохранённый локальный черновик удалён.', 'ok');
+    }
+
+    function addZone() {
+      state.zones.push(makeZone({ name: `Новая зона ${state.zones.length + 1}`, expanded: true }));
+      renderZones();
+      calculate();
+    }
+
+    function exportExcel() {
+      calculate();
+      const purchase = state.results.internalRows.reduce((sum, row) => sum + row.purchase, 0);
+      const client = state.results.clientRows.reduce((sum, row) => sum + row.totalClient, 0);
+      const html = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8" />
+<!--[if gte mso 9]>
+<xml>
+  <x:ExcelWorkbook>
+    <x:ExcelWorksheets>
+      <x:ExcelWorksheet><x:Name>Internal</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+    </x:ExcelWorksheets>
+  </x:ExcelWorkbook>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: Arial, sans-serif; color: #1d211f; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #d6dbd4; padding: 6px; vertical-align: top; }
+  th { background: #171b18; color: #fff; }
+  .title { font-size: 18px; font-weight: bold; }
+</style>
+</head>
+<body>
+<table>
+<tr><td class="title" colspan="2">VIZHU Presale Configurator v3</td></tr>
+<tr><td>Проект</td><td>${escapeHtml(state.project.projectName || 'Без названия')}</td></tr>
+<tr><td>Заказчик</td><td>${escapeHtml(state.project.clientName || '')}</td></tr>
+<tr><td>Тип объекта</td><td>${escapeHtml(optionLabel(state.project.projectType))}</td></tr>
+<tr><td>Режим</td><td>${escapeHtml(optionLabel(state.project.commercialMode))}</td></tr>
+<tr><td>Budget</td><td>${state.project.budget}</td></tr>
+<tr><td>Total purchase</td><td>${purchase}</td></tr>
+<tr><td>Total client</td><td>${client}</td></tr>
+</table>
+<br/>
+<table>
+<tr><th colspan="11">Internal BOM</th></tr>
+<tr><th>Зона</th><th>Раздел</th><th>Код</th><th>Наименование</th><th>Кол-во</th><th>Ед.</th><th>Категория</th><th>Себестоимость</th><th>Client price</th><th>Тип</th><th>Основание</th></tr>
+${state.results.internalRows.map(row => `<tr><td>${escapeHtml(row.zone)}</td><td>${escapeHtml(row.section)}</td><td>${escapeHtml(row.code)}</td><td>${escapeHtml(row.name)}</td><td>${row.qty}</td><td>${escapeHtml(row.unit)}</td><td>${escapeHtml(state.marginModel[row.category].label)}</td><td>${row.purchase}</td><td>${row.client}</td><td>${escapeHtml(row.type)}</td><td>${escapeHtml(row.reason)}</td></tr>`).join('')}
+</table>
+<br/>
+<table>
+<tr><th colspan="10">Client View</th></tr>
+<tr><th>Зона / блок</th><th>Equipment</th><th>Content</th><th>Integration</th><th>Site works</th><th>Engineering</th><th>Total purchase</th><th>Client offer</th><th>Margin</th><th>Комментарий</th></tr>
+${state.results.clientRows.map(row => `<tr><td>${escapeHtml(row.offerItem)}</td><td>${row.equipmentPurchase}</td><td>${row.contentPurchase}</td><td>${row.integrationPurchase}</td><td>${row.sitePurchase}</td><td>${row.engineeringPurchase}</td><td>${row.totalPurchase}</td><td>${row.totalClient}</td><td>${row.margin}</td><td>${escapeHtml(row.notes)}</td></tr>`).join('')}
+</table>
+</body>
+</html>`;
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${sanitizeFileName(state.project.projectName || 'vizhu-presale')}.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Excel-файл сформирован.', 'ok');
+    }
+
+    function bindActions() {
+      document.getElementById('recalcTop').addEventListener('click', calculate);
+      document.getElementById('recalcSide').addEventListener('click', calculate);
+      document.getElementById('saveTop').addEventListener('click', saveDraft);
+      document.getElementById('saveSide').addEventListener('click', saveDraft);
+      document.getElementById('loadDraft').addEventListener('click', loadDraft);
+      document.getElementById('resetState').addEventListener('click', () => resetState(true));
+      document.getElementById('deleteDraft').addEventListener('click', deleteDraft);
+      document.getElementById('addZone').addEventListener('click', addZone);
+      document.getElementById('expandZones').addEventListener('click', () => {
+        state.zones.forEach(z => z.expanded = true);
+        renderZones();
+      });
+      document.getElementById('collapseZones').addEventListener('click', () => {
+        state.zones.forEach(z => z.expanded = false);
+        renderZones();
+      });
+      document.getElementById('expandModules').addEventListener('click', () => {
+        state.systems.forEach(s => s.expanded = true);
+        renderModules();
+      });
+      document.getElementById('collapseModules').addEventListener('click', () => {
+        state.systems.forEach(s => s.expanded = false);
+        renderModules();
+      });
+      document.getElementById('exportTop').addEventListener('click', exportExcel);
+      document.getElementById('exportSpec').addEventListener('click', exportExcel);
+    }
+
+    function init() {
+      renderAll();
+      bindProjectFields();
+      bindActions();
+      initSectionObserver();
+    }
+
+    init();
+  </script>
+</body>
+</html>
